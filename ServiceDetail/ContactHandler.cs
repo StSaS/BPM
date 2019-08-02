@@ -61,6 +61,7 @@ namespace ServiceDetail
                 esqResult.AddColumn("UsrContactFriend");
                 esqResult.AddColumn("CreatedBy");
                 esqResult.AddColumn("UsrContact");
+                esqResult.AddColumn("UsrDescription");
 
                 var ContactIdFilter = esqResult.CreateFilterWithParameters(FilterComparisonType.Equal,
                     "UsrContact", contactId);
@@ -73,6 +74,7 @@ namespace ServiceDetail
                 for (int i = 0; i < entities.Count; i++)
                 {
                     var uContactFriend = entities[i].GetColumnValue("UsrContactFriendId");
+                    var uDescription = entities[i].GetColumnValue("UsrDescription");
 
                     var managerUsrFriend = _userConnection.EntitySchemaManager.GetInstanceByName("UsrFriend");
 
@@ -81,6 +83,7 @@ namespace ServiceDetail
                     usrFriend.SetDefColumnValues();
                     usrFriend.SetDefColumnValue("UsrContactFriendId", uContactFriend);
                     usrFriend.SetDefColumnValue("UsrContactId", guid);
+                    usrFriend.SetDefColumnValue("UsrDescription", uDescription);
 
                     usrFriend.Save();
 
@@ -130,6 +133,7 @@ namespace ServiceDetail
             select = new Select(_userConnection)
                 .Column("UsrContactFriendId")
                 .Column("CreatedById")
+                .Column("UsrDescription")
                 .From("UsrFriend")
                 .Where("UsrContactId").IsEqual(Column.Parameter(contactId)) as Select;//список для связки в детали
 
@@ -141,12 +145,14 @@ namespace ServiceDetail
                     {
                         var UsrContactFriendId = reader[0];
                         var CreatedById = reader[1];
+                        var UsrDescript = reader[2];
 
                         var ins = new Insert(_userConnection)
                         .Into("UsrFriend")
                         .Set("UsrContactFriendId", Column.Parameter(UsrContactFriendId))
                         .Set("CreatedById", Column.Parameter(CreatedById))
-                        .Set("UsrContactId", Column.Parameter(newId));
+                        .Set("UsrContactId", Column.Parameter(newId))
+                        .Set("UsrDescription",Column.Parameter(UsrDescript));
 
                         affectedRows = ins.Execute();
                     }
